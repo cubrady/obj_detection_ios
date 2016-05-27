@@ -84,7 +84,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
             let executionTimeInterval = end - start
             let exetime = String(format: "%.3f", executionTimeInterval)
             
-            timeTestField.text = "time : \(exetime) , rect count : \(features.count)"
+            timeTestField.text = "\(exetime), rect : \(features.count)"
             
             //This line of code creates a new image context with the same size as testImage.
             UIGraphicsBeginImageContext(testImage.size)
@@ -187,6 +187,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         // Get the detections
         let features = faceCIDector.featuresInImage(ciImage)
         print("Face count:\(features.count)")
+        timeTestField.text = "\(timeTestField.text) Face:\(features.count)"
+        
         for feature in features as! [CIFaceFeature] {
             print("Find face:\(feature.bounds) / \(ciImage.extent)")
             
