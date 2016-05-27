@@ -49,7 +49,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     }
     
     func testDetection() {
+        
         photoImageView.image = detectRect(selectedImage!)
+
+        let img = performRectangleDetection(CIImage(image :selectedImage)!)
+        if img != nil {
+            print("performRectangleDetection done, img size:\(img?.extent)")
+            photoImageView.image? = UIImage(CIImage: img!)
+        }
     }
     
     func detectRect(testImage : UIImage) -> UIImage {
@@ -115,6 +122,34 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
             
         }
         return drawedImage!
+    }
+    
+    func performRectangleDetection(image: CIImage) -> CIImage? {
+        var resultImage: CIImage?
+        
+            // Get the detections
+            let features = rectCIDector.featuresInImage(image)
+            for feature in features as! [CIRectangleFeature] {
+                resultImage = drawHighlightOverlayForPoints(image, topLeft: feature.topLeft, topRight: feature.topRight,
+                                                            bottomLeft: feature.bottomLeft, bottomRight: feature.bottomRight)
+            }
+        
+        return resultImage
+    }
+    
+    func drawHighlightOverlayForPoints(image: CIImage, topLeft: CGPoint, topRight: CGPoint,
+                                       bottomLeft: CGPoint, bottomRight: CGPoint) -> CIImage {
+        var overlay = CIImage(color: CIColor(red: 1.0, green: 0, blue: 0, alpha: 0.5))
+        overlay = overlay.imageByCroppingToRect(image.extent)
+        overlay = overlay.imageByApplyingFilter("CIPerspectiveTransformWithExtent",
+                                                withInputParameters: [
+                                                    "inputExtent": CIVector(CGRect: image.extent),
+                                                    "inputTopLeft": CIVector(CGPoint: topLeft),
+                                                    "inputTopRight": CIVector(CGPoint: topRight),
+                                                    "inputBottomLeft": CIVector(CGPoint: bottomLeft),
+                                                    "inputBottomRight": CIVector(CGPoint: bottomRight)
+            ])
+        return overlay.imageByCompositingOverImage(image)
     }
         
     //MARK: Actions
